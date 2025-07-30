@@ -2,12 +2,14 @@
 
 ## Core Purpose & Success
 
-**Mission Statement**: Enable community members to report public issues and get rewarded for their civic engagement while staying informed through real-time notifications.
+**Mission Statement**: Enable authenticated community members to report public issues and get rewarded for their civic engagement while staying informed through real-time notifications.
 
 **Success Indicators**: 
-- Users report issues consistently and track their resolution
+- Users sign in and report issues consistently, tracking their resolution
+- User-specific data persistence across sessions and devices
 - Push notifications increase user engagement with status updates
-- Community feels empowered to address local problems
+- Community leaderboard drives healthy competition
+- Users feel ownership of their civic contributions
 
 **Experience Qualities**: Engaging, Responsive, Community-Driven
 
@@ -15,7 +17,7 @@
 
 **Complexity Level**: Light Application (multiple features with basic state and push notifications)
 
-**Primary User Activity**: Acting - Users actively report issues, track status, and receive notifications about progress and nearby community activity.
+**Primary User Activity**: Acting - Authenticated users actively report issues, track status, compete on leaderboards, and receive notifications about progress and nearby community activity.
 
 ## Thought Process for Feature Selection
 
@@ -23,19 +25,26 @@
 
 **User Context**: Citizens encounter problems in their daily lives and want to help improve their community, but need feedback and recognition to stay motivated.
 
-**Critical Path**: Report Issue → Track Status → Receive Notifications → Earn Recognition → Continue Engagement
+**Critical Path**: Sign In → Report Issue → Track Status → Receive Notifications → Earn Recognition → Compete with Community → Continue Engagement
 
 **Key Moments**: 
-1. First successful issue report with immediate feedback
-2. Receiving status update notifications showing progress
-3. Achievement unlocks that recognize community contribution
+1. Seamless GitHub authentication that builds trust
+2. First successful issue report with immediate feedback and point earning
+3. Receiving status update notifications showing progress
+4. Achievement unlocks that recognize community contribution
+5. Seeing rank on community leaderboard
 
 ## Essential Features
 
+### User Authentication System
+**What it does**: Enables GitHub-based login to create personalized user accounts and persistent data  
+**Why it matters**: Provides data persistence, user identity, and enables community features like leaderboards  
+**Success criteria**: Users can sign in seamlessly and their data persists across sessions and devices
+
 ### Issue Reporting System
-**What it does**: Allows users to report public issues with photos, descriptions, and location data  
-**Why it matters**: Core functionality that enables community problem reporting  
-**Success criteria**: Users can quickly submit reports with all necessary details
+**What it does**: Allows authenticated users to report public issues with photos, descriptions, and location data  
+**Why it matters**: Core functionality that enables community problem reporting with user attribution  
+**Success criteria**: Users can quickly submit reports with all necessary details linked to their profile
 
 ### Status Tracking & Notifications
 **What it does**: Tracks issue progress through workflow stages and sends push notifications for updates  
@@ -53,9 +62,9 @@
 **Success criteria**: Users earn points and unlock achievements that encourage continued use
 
 ### Leaderboard & Community Stats
-**What it does**: Shows community impact and top contributors  
-**Why it matters**: Creates social motivation and demonstrates collective impact  
-**Success criteria**: Users can see their contribution in context of community efforts
+**What it does**: Shows authenticated users' rankings and community impact with personalized stats  
+**Why it matters**: Creates social motivation and demonstrates collective impact with user recognition  
+**Success criteria**: Users can see their contribution and ranking in context of community efforts
 
 ## Design Direction
 
@@ -100,11 +109,11 @@
 **Icon Selection**: Phosphor icons for consistency and civic themes (map pins, trophies, bells)  
 **Mobile Adaptation**: Touch-friendly controls for photo capture and form submission
 
-### Notification System Design
-**Permission Strategy**: Clear explanation of notification benefits before requesting permission  
-**Notification Types**: Status updates, nearby issues, achievement unlocks  
-**Timing Strategy**: Immediate for status changes, periodic for nearby issues  
-**Rich Notifications**: Include actions like "View Report" and contextual information
+### Authentication & User Experience
+**Permission Strategy**: Clear explanation of GitHub authentication benefits before sign-in  
+**User Profile Management**: User menu with stats, avatar, and logout functionality  
+**Data Persistence**: User-specific reports and achievements that persist across sessions  
+**Privacy**: Clear communication about data usage and GitHub integration
 
 ### Visual Consistency Framework
 **Design System Approach**: Component-based with shadcn/ui foundation  
@@ -117,6 +126,12 @@
 
 ## Implementation Considerations
 
+### Authentication & Data Management
+- **GitHub Integration**: Leverages existing developer accounts for trusted authentication
+- **User Data Privacy**: Clear handling of GitHub profile information
+- **Cross-Session Persistence**: User-specific data that survives browser sessions
+- **User Experience**: Seamless login flow with clear benefits communication
+
 ### Push Notification Features
 - **Permission Management**: Graceful degradation when notifications are disabled
 - **Notification Preferences**: Granular control over notification types
@@ -124,16 +139,21 @@
 - **Offline Capability**: Service worker foundation for future offline support
 
 ### Scalability Needs
+- **User Account Management**: Efficient handling of user sessions and data segregation
 - **Notification Scaling**: Efficient notification delivery and user preference management
-- **Data Persistence**: Browser storage for notification preferences and settings
+- **Data Persistence**: User-specific browser storage for reports and notification preferences
 
 ### Critical Questions
+- How will users understand the benefits of GitHub authentication?
 - How will users discover and configure notification preferences?
 - What happens when users disable notifications after initial setup?
 - How do we prevent notification fatigue while maintaining engagement?
+- How do we handle users who want to switch GitHub accounts?
 
 ## Edge Cases & Problem Scenarios
 
+**Authentication Failures**: Clear error messages and retry mechanisms for GitHub login issues  
+**Account Switching**: Graceful handling when users want to use different GitHub accounts  
 **Notification Permission Denied**: Clear guidance on re-enabling in browser settings  
 **Offline Reporting**: Graceful handling when network is unavailable  
 **Photo Upload Failures**: Retry mechanisms and clear error messages  
@@ -141,8 +161,8 @@
 
 ## Reflection
 
-**Unique Approach**: Combines civic engagement with gamification and real-time notifications to maintain long-term user engagement in community improvement.
+**Unique Approach**: Combines GitHub authentication with civic engagement, gamification, and real-time notifications to create a trusted, persistent platform for community improvement that builds user identity and long-term engagement.
 
-**Key Assumptions**: Users want to be notified about issue progress and will respond positively to achievement-based motivation for civic participation.
+**Key Assumptions**: Users trust GitHub authentication for civic applications, want personalized tracking of their community contributions, and will respond positively to achievement-based motivation for civic participation.
 
-**Exceptional Elements**: The push notification system transforms passive issue reporting into an engaging, ongoing relationship between citizens and their community improvement efforts.
+**Exceptional Elements**: The GitHub authentication system creates a trusted foundation for civic engagement, while push notifications and persistent user data transform passive issue reporting into an ongoing, personalized relationship between citizens and their community improvement efforts.

@@ -5,9 +5,13 @@ import type { Issue } from '@/App'
 
 interface LeaderboardProps {
   reports: Issue[]
+  currentUser?: {
+    login: string
+    avatarUrl: string
+  } | null
 }
 
-export function Leaderboard({ reports }: LeaderboardProps) {
+export function Leaderboard({ reports, currentUser }: LeaderboardProps) {
   // Create mock leaderboard data based on the current user's performance
   const currentUserStats = {
     totalPoints: reports.reduce((sum, report) => sum + report.points, 0),
@@ -35,7 +39,7 @@ export function Leaderboard({ reports }: LeaderboardProps) {
     },
     {
       rank: 3,
-      name: 'You',
+      name: currentUser?.login || 'You',
       points: currentUserStats.totalPoints || 0,
       reports: currentUserStats.totalReports,
       resolved: currentUserStats.resolvedReports,

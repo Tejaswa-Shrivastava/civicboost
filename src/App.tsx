@@ -12,7 +12,10 @@ import { UserStats } from '@/components/UserStats'
 import { NotificationCenter } from '@/components/NotificationCenter'
 import { NotificationIndicator } from '@/components/NotificationIndicator'
 import { NotificationDemo } from '@/components/NotificationDemo'
+import { LoginScreen } from '@/components/LoginScreen'
+import { UserMenu } from '@/components/UserMenu'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useAuth } from '@/hooks/useAuth'
 import { Toaster } from 'sonner'
 
 export interface Issue {
@@ -26,6 +29,8 @@ export interface Issue {
   points: number
   submittedAt: string
   updatedAt: string
+  userId?: string  // Link reports to users
+  userLogin?: string  // Store username for display
 }
 
 export interface UserProfile {
@@ -35,6 +40,7 @@ export interface UserProfile {
 }
 
 function App() {
+  const { user, isLoading: authLoading, login, logout, isAuthenticated } = useAuth()
   const [reports, setReports] = useKV<Issue[]>('user-reports', [])
   const [userProfile, setUserProfile] = useKV<UserProfile>('user-profile', {
     totalPoints: 0,
@@ -51,13 +57,25 @@ function App() {
     }
   }, [notificationSettings.enabled, notificationSettings.nearbyIssues, notificationService])
 
-  const addReport = (newReport: Omit<Issue, 'id' | 'submittedAt' | 'updatedAt' | 'points'>) => {
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={login} isLoading={authLoading} />
+  }
+
+  // Filter reports to show only current user's reports
+  const userReports = reports.filter(report => 
+    report.userId === user?.id || (!report.userId && user?.isOwner)
+  )
+
+  const addReport = (newReport: Omit<Issue, 'id' | 'submittedAt' | 'updatedAt' | 'points' | 'userId' | 'userLogin'>) => {
     const issue: Issue = {
       ...newReport,
       id: `issue-${Date.now()}`,
       submittedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      points: 10 // Base points for submitting
+      points: 10, // Base points for submitting
+      userId: user?.id,
+      userLogin: user?.login
     }
 
     setReports(current => [...current, issue])
@@ -156,7 +174,11 @@ function App() {
             </div>
             <div className="flex items-center gap-4">
               <NotificationIndicator />
-              <UserStats profile={userProfile} />
+              <UserMenu 
+                user={user!} 
+                profile={userProfile} 
+                onLogout={logout} 
+              />
             </div>
           </div>
         </div>
@@ -206,7 +228,7 @@ function App() {
             )}
 
             <div className="grid gap-4">
-              {reports.length === 0 ? (
+              {userReports.length === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent>
                     <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -221,7 +243,7 @@ function App() {
                   </CardContent>
                 </Card>
               ) : (
-                reports.map(report => (
+                userReports.map(report => (
                   <ReportCard
                     key={report.id}
                     report={report}
@@ -233,7 +255,7 @@ function App() {
           </TabsContent>
 
           <TabsContent value="leaderboard">
-            <Leaderboard reports={reports} />
+            <Leaderboard reports={reports} currentUser={user} />
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-6">
