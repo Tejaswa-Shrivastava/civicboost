@@ -1,14 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Trophy, Plus, Camera, Award } from '@phosphor-icons/react'
+import { MapPin, Trophy, Plus, Camera, Award, Bell } from '@phosphor-icons/react'
 import { ReportForm } from '@/components/ReportForm'
 import { ReportCard } from '@/components/ReportCard'
 import { Leaderboard } from '@/components/Leaderboard'
 import { UserStats } from '@/components/UserStats'
+import { NotificationCenter } from '@/components/NotificationCenter'
+import { NotificationIndicator } from '@/components/NotificationIndicator'
+import { NotificationDemo } from '@/components/NotificationDemo'
+import { useNotifications } from '@/hooks/useNotifications'
+import { Toaster } from 'sonner'
 
 export interface Issue {
   id: string
@@ -37,6 +42,14 @@ function App() {
     achievements: []
   })
   const [showReportForm, setShowReportForm] = useState(false)
+  const { settings: notificationSettings, sendStatusUpdate, sendAchievement, service: notificationService } = useNotifications()
+
+  // Initialize notification monitoring on app load
+  useEffect(() => {
+    if (notificationSettings.enabled && notificationSettings.nearbyIssues) {
+      notificationService.startNearbyIssueMonitoring()
+    }
+  }, [notificationSettings.enabled, notificationSettings.nearbyIssues, notificationService])
 
   const addReport = (newReport: Omit<Issue, 'id' | 'submittedAt' | 'updatedAt' | 'points'>) => {
     const issue: Issue = {
@@ -58,12 +71,21 @@ function App() {
       // Award achievements
       if (newTotalReports === 1 && !newAchievements.includes('first-report')) {
         newAchievements.push('first-report')
+        setTimeout(() => {
+          sendAchievement('Getting Started', 'Submit your first report')
+        }, 1500)
       }
       if (newTotalReports === 5 && !newAchievements.includes('reporter')) {
         newAchievements.push('reporter')
+        setTimeout(() => {
+          sendAchievement('Community Reporter', 'Submit 5 reports')
+        }, 1500)
       }
       if (newTotalPoints >= 100 && !newAchievements.includes('centurion')) {
         newAchievements.push('centurion')
+        setTimeout(() => {
+          sendAchievement('Point Centurion', 'Earn 100 points')
+        }, 1500)
       }
 
       return {
@@ -100,6 +122,16 @@ function App() {
             }))
           }
 
+          // Send status update notification
+          setTimeout(() => {
+            sendStatusUpdate(
+              report.title,
+              report.status,
+              newStatus,
+              report.id
+            )
+          }, 1000)
+
           return updated
         }
         return report
@@ -109,6 +141,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Toaster richColors position="top-right" />
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -121,14 +154,17 @@ function App() {
                 <p className="text-sm text-muted-foreground">Making our community better, together</p>
               </div>
             </div>
-            <UserStats profile={userProfile} />
+            <div className="flex items-center gap-4">
+              <NotificationIndicator />
+              <UserStats profile={userProfile} />
+            </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="reports" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               My Reports
@@ -140,6 +176,10 @@ function App() {
             <TabsTrigger value="achievements" className="flex items-center gap-2">
               <Award className="w-4 h-4" />
               Achievements
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Notifications
             </TabsTrigger>
           </TabsList>
 
@@ -241,6 +281,18 @@ function App() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Notification Settings</h2>
+              <p className="text-muted-foreground">Stay informed about your reports and community activity</p>
+            </div>
+            
+            <div className="grid gap-6 lg:grid-cols-2">
+              <NotificationCenter />
+              <NotificationDemo />
             </div>
           </TabsContent>
         </Tabs>
